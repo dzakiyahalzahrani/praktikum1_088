@@ -21,24 +21,34 @@
     </head>
     <body class="bg-black min-h-screen flex items-center justify-center">
 
-    <div class="bg-zinc-900/80 backdrop-blur-md border border-zinc-700 rounded-xl 
-            w-[700px] px-16 py-14 shadow-2xl">
+    <div class="bg-gradient-to-br from-zinc-900 to-zinc-950 
+                border border-zinc-800 
+                rounded-2xl 
+                w-[720px] 
+                px-20 py-16 
+                shadow-[0_0_60px_rgba(0,0,0,0.6)]">
 
-        <h1 class="text-white text-xl font-semibold">
+        <h1 class="text-white text-2xl font-semibold tracking-wide">
             Dzakiyah Al Zahrani
         </h1>
 
-        <p class="text-zinc-400 mt-2">
+        <p class="text-zinc-500 mt-3 text-lg">
             20230140088
         </p>
 
-        <button class="mt-8 bg-zinc-200 text-black 
-                       px-6 py-2 rounded-md 
-                       hover:bg-white transition duration-200">
+        <button class="mt-10 
+                       bg-zinc-200 
+                       text-black 
+                       px-7 py-2.5 
+                       rounded-lg 
+                       font-medium
+                       hover:bg-white 
+                       hover:scale-105
+                       transition-all duration-300">
             Modul Pertemuan 1
         </button>
 
     </div>
 
 </body>
-</html>
+    </html>
