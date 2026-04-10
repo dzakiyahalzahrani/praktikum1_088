@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
+    // leaving out an explicit table name – Eloquent will use "products" by default.
+
     protected $table = 'product';
 
     protected $fillable = [
@@ -14,6 +16,7 @@ class Product extends Model
         'quantity',
         'price',
         'user_id',
+        
     ];
 
     public function user()
@@ -23,6 +26,7 @@ class Product extends Model
 
     public function category()
     {
-        return $this->hasOne(Category::class);
+        // a product belongs to a category
+        return $this->hasMany(Category::class);
     }
 }
