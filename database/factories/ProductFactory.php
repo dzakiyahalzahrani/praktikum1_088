@@ -15,6 +15,8 @@ class ProductFactory extends Factory
             'name' => $this->faker->words(2, true), // <-- perbaikan penting
             'quantity' => $this->faker->numberBetween(1, 100), // <-- perbaikan penting
             'price' => $this->faker->numberBetween(10000, 1000000), // <-- perbaikan penting
+
+            'categories_id' => \App\Models\Category::inRandomOrder()->first()->id,
         ];
     }
 }

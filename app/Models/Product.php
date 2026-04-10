@@ -16,6 +16,7 @@ class Product extends Model
         'quantity',
         'price',
         'user_id',
+        'categories_id', // <-- perbaikan penting
         
     ];
 
@@ -27,6 +28,6 @@ class Product extends Model
     public function category()
     {
         // a product belongs to a category
-        return $this->hasMany(Category::class);
+        return $this->belongsTo(Category::class, 'categories_id');
     }
 }

@@ -22,7 +22,7 @@ class CategoryFactory extends Factory
                 'Perabotan',
                 'Olahraga',
             ]),
-            'product_id' => Product::all()->random()->id,
+            //'product_id' => Product::all()->random()->id,
         ];
     }
 }

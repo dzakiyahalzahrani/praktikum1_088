@@ -6,9 +6,12 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProductController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index()
     {
         // Ubah dari all() menjadi paginate()
@@ -45,9 +48,12 @@ class ProductController extends Controller
         return view('product.view', compact('product'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Product $product) // Ubah $id menjadi Product $product
     {
-        $product = Product::findOrFail($id);
+        // ==========================================
+        // 2. TAMBAHKAN OTORISASI POLICY (UPDATE)
+        // ==========================================
+        $this->authorize('update', $product);
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -64,17 +70,36 @@ class ProductController extends Controller
 
     public function edit(Product $product)
 {
+    $this->authorize('update', $product);
+
     $users = User::orderBy('name')->get();
     $categories = Category::orderBy('name')->get();
 
     return view('product.edit', compact('product', 'users', 'categories'));
 }
 
-    public function delete($id)
+    public function delete(Product $product) // Ubah $id menjadi Product $product
     {
-        $product = Product::findOrFail($id);
+        // ==========================================
+        // 3. TAMBAHKAN OTORISASI POLICY (DELETE)
+        // Memeriksa apakah user/admin boleh menghapus
+        // ==========================================
+        $this->authorize('delete', $product);
+
         $product->delete();
 
         return redirect()->route('product.index')->with('success', 'Product berhasil dihapus');
+    }
+
+    // Tambahkan method ini jika Anda ingin menjalankan instruksi export Gate
+    public function export()
+    {
+        // Cek Gate secara manual di Controller
+        if (\Illuminate\Support\Facades\Gate::denies('export-product')) {
+            abort(403, 'Hanya Admin yang bisa export data.');
+        }
+
+        // Logika export Anda di sini...
+        return response()->json(['message' => 'Proses export dimulai...']);
     }
 }
