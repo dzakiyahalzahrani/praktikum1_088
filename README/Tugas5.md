@@ -6,7 +6,7 @@
 2. Halaman Index Product (Gate) menu "Product" muncul di navbar dan tombol "Export Excel" terlihat
 ![alt text](<Tugas5/gate export excel.png>)
 
-3. pada tabel produk, tombol "Hapus" muncul di semua baris produk
+3. Admin bisa menghapus product yang dia tambahkan  
 ![alt text](<Tugas5/tombol hapus admin.png>)
 
 4. Login User 
