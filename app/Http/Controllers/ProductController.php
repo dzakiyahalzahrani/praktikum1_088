@@ -19,76 +19,119 @@ class ProductController extends Controller
         return view('product.index', compact('products'));
     }
 
+    
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'quantity' => 'required|integer',
-        'price' => 'required|numeric',
-        'user_id' => 'required|exists:users,id',
-        'categories_id' => 'required|exists:categories,id',
-    ]);
-
-    Product::create($validated);
-
-    return redirect()->route('product.index')->with('success', 'Product created successfully.');
-}
-
-    public function create()
-{
-    $users = User::orderBy('name')->get();
-    $categories = Category::orderBy('name')->get();
-
-    return view('product.create', compact('users', 'categories'));
-}
-
-    public function show($id)
     {
-        $product = Product::findOrFail($id);
-        return view('product.view', compact('product'));
+        $isAdmin = auth()->user()->role === 'admin';
+
+        // Array pesan error kustom dari modul
+        $customMessages = [
+            'name.required' => 'Nama produk wajib diisi.',
+            'name.max' => 'Nama produk tidak boleh lebih dari 255 karakter.',
+            'quantity.required' => 'Jumlah (kuantitas) produk wajib diisi.',
+            'quantity.integer' => 'Jumlah produk harus berupa angka bulat (tidak boleh desimal).',
+            'price.required' => 'Harga produk wajib diisi.',
+            'price.numeric' => 'Harga produk harus berupa angka yang valid.',
+        ];
+
+        if ($isAdmin) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'quantity' => 'required|integer',
+                'price' => 'required|numeric',
+                'user_id' => 'required|exists:users,id',
+                'categories_id' => 'required|exists:categories,id',
+            ], $customMessages);
+        } else {
+            // User biasa
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'quantity' => 'required|integer',
+                'price' => 'required|numeric',
+            ], $customMessages);
+            
+            $validated['user_id'] = auth()->id();
+            $validated['categories_id'] = Category::firstOrCreate(['name' => 'Uncategorized'])->id;
+        }
+
+        Product::create($validated);
+
+        return redirect()->route('product.index')->with('success', 'Product created successfully.');
     }
 
-    public function update(Request $request, Product $product) // Ubah $id menjadi Product $product
+    public function create()
     {
-        // ==========================================
-        // 2. TAMBAHKAN OTORISASI POLICY (UPDATE)
-        // ==========================================
+        $isAdmin = auth()->user()->role === 'admin';
+        $users = $isAdmin ? User::orderBy('name')->get() : collect();
+        $categories = $isAdmin ? Category::orderBy('name')->get() : collect();
+
+        return view('product.create', compact('users', 'categories', 'isAdmin'));
+    }
+
+    public function edit(Product $product)
+    {
+        $this->authorize('update', $product);
+        
+        $isAdmin = auth()->user()->role === 'admin';
+        $users = $isAdmin ? User::orderBy('name')->get() : collect();
+        $categories = $isAdmin ? Category::orderBy('name')->get() : collect();
+
+        return view('product.edit', compact('product', 'users', 'categories', 'isAdmin'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
         $this->authorize('update', $product);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'quantity' => 'sometimes|integer',
-            'price' => 'sometimes|numeric',
-            'user_id' => 'sometimes|exists:users,id',
-            'categories_id' => 'required|exists:categories,id',
-        ]);
+        $isAdmin = auth()->user()->role === 'admin';
+
+        // Array pesan error kustom dari modul
+        $customMessages = [
+            'name.required' => 'Nama produk wajib diisi.',
+            'name.max' => 'Nama produk tidak boleh lebih dari 255 karakter.',
+            'quantity.required' => 'Jumlah (kuantitas) produk wajib diisi.',
+            'quantity.integer' => 'Jumlah produk harus berupa angka bulat (tidak boleh desimal).',
+            'price.required' => 'Harga produk wajib diisi.',
+            'price.numeric' => 'Harga produk harus berupa angka yang valid.',
+        ];
+
+        if ($isAdmin) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'quantity' => 'required|integer',
+                'price' => 'required|numeric',
+                'user_id' => 'required|exists:users,id',
+                'categories_id' => 'required|exists:categories,id',
+            ], $customMessages);
+        } else {
+            // User biasa
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'quantity' => 'required|integer',
+                'price' => 'required|numeric',
+            ], $customMessages);
+            
+            $validated['user_id'] = $product->user_id;
+            $validated['categories_id'] = $product->categories_id;
+        }
 
         $product->update($validated);
 
         return redirect()->route('product.index')->with('success', 'Product updated successfully.');
     }
 
-    public function edit(Product $product)
-{
-    $this->authorize('update', $product);
-
-    $users = User::orderBy('name')->get();
-    $categories = Category::orderBy('name')->get();
-
-    return view('product.edit', compact('product', 'users', 'categories'));
-}
-
-    public function delete(Product $product) // Ubah $id menjadi Product $product
+   public function delete($id)
     {
-        // ==========================================
-        // 3. TAMBAHKAN OTORISASI POLICY (DELETE)
-        // Memeriksa apakah user/admin boleh menghapus
-        // ==========================================
+        // 1. Cari produknya dulu
+        $product = Product::findOrFail($id);
+
+        // 2. PASANG GEMBOKNYA DI SINI
         $this->authorize('delete', $product);
 
         $product->delete();
 
-        return redirect()->route('product.index')->with('success', 'Product berhasil dihapus');
+        return back()->with('success', 'Product berhasil dihapus');
     }
 
     // Tambahkan method ini jika Anda ingin menjalankan instruksi export Gate
