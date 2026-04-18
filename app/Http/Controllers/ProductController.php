@@ -68,6 +68,13 @@ class ProductController extends Controller
         return view('product.create', compact('users', 'categories', 'isAdmin'));
     }
 
+    public function show($id)
+    {
+        $product = Product::findOrFail($id);
+        
+        return view('product.view', compact('product'));
+    }
+
     public function edit(Product $product)
     {
         $this->authorize('update', $product);
