@@ -11,10 +11,10 @@ class Category extends Model
 
     protected $table = 'categories'; // ← FIX
 
-    protected $fillable = ['name', 'product_id'];
+    protected $fillable = ['name'];
 
-    public function product()
+    public function products()
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(Product::class, 'categories_id');
     }
 }
